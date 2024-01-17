@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.care.bowfun.notice.NoticeMapper">
+	<resultMap type="com.care.bowfun.notice.NoticeDTO"
+		id="Notice_bowfun">
+		<result column="write_date" property="writeDate" />
+		<result column="file_name" property="fileName" />
+	</resultMap>
+
+	<select id="NoticeForm" resultMap="Notice_bowfun">
+		SELECT B.* FROM (SELECT ROWNUM
+		as r, A.* FROM (SELECT Notice_bowfun.* FROM
+		Notice_bowfun ORDER BY no
+		DESC)A )B WHERE B.r BETWEEN #{begin} AND
+		#{end}
+	</select>
+
+	<select id="totalCount">
+		SELECT count(no) FROM Notice_bowfun
+	</select>
+
+	<insert id="NoticeWriteProc">
+		<selectKey order="BEFORE" keyProperty="no" resultType="int">
+			SELECT NVL(max(no), 0)+1 FROM Notice_bowfun
+		</selectKey>
+		INSERT INTO Notice_bowfun
+		VALUES(Notice_bowfun_seq.nextval, #{title},
+		#{content}, #{id}, sysdate, 0, #{fileName})
+	</insert>
+
+	<select id="NoticeContent" resultMap="Notice_bowfun">
+		SELECT * FROM Notice_bowfun
+		WHERE no=#{n}
+	</select>
+
+	<update id="incrementViews">
+		UPDATE Notice_bowfun SET views = views + 1 WHERE
+		no=#{n}
+	</update>
+
+	<select id="NoticeDownload">
+		SELECT file_name FROM Notice_bowfun WHERE no=#{n}
+	</select>
+
+	<update id="NoticeModifyProc">
+		UPDATE Notice_bowfun SET title=#{title},
+		content=#{content} WHERE no=#{no}
+	</update>
+
+	<delete id="NoticeDeleteProc">
+		DELETE FROM Notice_bowfun WHERE no=#{n}
+	</delete>
+</mapper>
